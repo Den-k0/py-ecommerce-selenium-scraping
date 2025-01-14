@@ -49,32 +49,32 @@ def parse_single_product(product: WebElement) -> Product:
 
 
 def get_products(url: str) -> list[Product]:
-    driver = webdriver.Chrome()
-    driver.get(url)
-    actions = ActionChains(driver)
+    with webdriver.Chrome() as driver:
+        driver.get(url)
+        actions = ActionChains(driver)
 
-    while True:
-        try:
-            more_button_selector = (
-                "a.btn.btn-lg.btn-block.btn-primary.ecomerce-items-scroll-more"
-            )
-            button = WebDriverWait(driver, 1).until(
-                EC.element_to_be_clickable(
-                    (By.CSS_SELECTOR, more_button_selector)
+        while True:
+            try:
+                more_button_selector = (
+                    "a.btn.btn-lg.btn-block.btn-primary.ecomerce-items-scroll-more"
                 )
-            )
-            driver.execute_script("arguments[0].scrollIntoView(true);", button)
-            actions.move_to_element(button).perform()
+                button = WebDriverWait(driver, 1).until(
+                    EC.element_to_be_clickable(
+                        (By.CSS_SELECTOR, more_button_selector)
+                    )
+                )
+                driver.execute_script("arguments[0].scrollIntoView(true);", button)
+                actions.move_to_element(button).perform()
 
-            button.click()
-            time.sleep(0.5)
+                button.click()
+                time.sleep(0.5)
 
-        except (NoSuchElementException, TimeoutException):
-            print("No more products to load.")
-            break
+            except (NoSuchElementException, TimeoutException):
+                print("No more products to load.")
+                break
 
-    products = driver.find_elements(By.CLASS_NAME, "card-body")
-    return [parse_single_product(product) for product in products]
+        products = driver.find_elements(By.CLASS_NAME, "card-body")
+        return [parse_single_product(product) for product in products]
 
 
 def write_products_csv(products: list[Product], file_name: str) -> None:
