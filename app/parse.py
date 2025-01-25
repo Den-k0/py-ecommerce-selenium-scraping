@@ -1,4 +1,5 @@
 import csv
+import logging
 import time
 from dataclasses import dataclass, fields, astuple
 from urllib.parse import urljoin
@@ -70,7 +71,7 @@ def get_products(url: str) -> list[Product]:
                 time.sleep(0.5)
 
             except (NoSuchElementException, TimeoutException):
-                print("No more products to load.")
+                logging.info("No more products to load.")
                 break
 
         products = driver.find_elements(By.CLASS_NAME, "card-body")
@@ -85,19 +86,19 @@ def write_products_csv(products: list[Product], file_name: str) -> None:
 
 
 def get_all_products() -> None:
-    write_products_csv(
-        get_products(HOME_URL), "home.csv")
-    write_products_csv(
-        get_products(urljoin(HOME_URL, "computers")), "computers.csv")
-    write_products_csv(
-        get_products(urljoin(HOME_URL, "computers/laptops")), "laptops.csv")
-    write_products_csv(
-        get_products(urljoin(HOME_URL, "computers/tablets")), "tablets.csv")
-    write_products_csv(
-        get_products(urljoin(HOME_URL, "phones")), "phones.csv")
-    write_products_csv(
-        get_products(urljoin(HOME_URL, "phones/touch")), "touch.csv")
+    categories = [
+        ("", "home.csv"),
+        ("computers", "computers.csv"),
+        ("computers/laptops", "laptops.csv"),
+        ("computers/tablets", "tablets.csv"),
+        ("phones", "phones.csv"),
+        ("phones/touch", "touch.csv"),
+    ]
+
+    for category, filename in categories:
+        write_products_csv(get_products(urljoin(HOME_URL, category)), filename)
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     get_all_products()
